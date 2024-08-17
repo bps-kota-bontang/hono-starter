@@ -1,0 +1,49 @@
+name: hono-starter
+
+services:
+  app:
+    container_name: hono-starter-app
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    env_file: ".env"
+    ports:
+      - 3000:3000
+    networks:
+      - hono_starter_network
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://hono-starter-app:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+  postgres:
+    container_name: hono-starter-postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: example_db
+    ports:
+      - 5432:5432
+    volumes:
+      - hono_starter_postgres_data:/var/lib/postgresql/data
+  mongo:
+    container_name: hono-starter-mongo
+    image: mongo:7.0.12
+    ports:
+      - 27017:27017
+    networks:
+      - hono_starter_network
+    volumes:
+      - hono_starter_mongo_data:/data/db
+      - hono_starter_mongo_config:/data/
+networks:
+  hono_starter_network:
+    driver: bridge
+volumes:
+  hono_starter_postgres_data:
+  hono_starter_mongo_data:
+  hono_starter_mongo_config:
